@@ -4,90 +4,94 @@
 int main() {
     std::string veryLargeNumberOne, veryLargeNumberTwo;
 
-    veryLargeNumberOne = std::to_string(367);
-    veryLargeNumberTwo = std::to_string(35);
-
-    //std::cout << "Enter your first number: ";
-    //std::cin >> veryLargeNumberOne;
-    //std::cout << "\nEnter your second number: ";
-    //std::cin >> veryLargeNumberTwo;
+    std::cout << "Enter your first number: ";
+    std::cin >> veryLargeNumberOne;
+    std::cout << "\nEnter your second number: ";
+    std::cin >> veryLargeNumberTwo;
 
     std::string largeSubtractor(std::string minuend, std::string subtrahend);
-    std::cout << largeSubtractor(veryLargeNumberOne, veryLargeNumberTwo);
+    std::cout << largeSubtractor(veryLargeNumberOne, veryLargeNumberTwo) << std::endl;
 }
 
 std::string largeSubtractor(std::string minuend, std::string subtrahend) {
-    int workingDigitMinuend, workingDigitMinuendTwo, workingDigitSubtrahend, difference, borrowedDigit;
-    std::string workingCharMinuend, borrowedChar, workingCharSubtrahend, finalDifference, workingDiffrenceChar;
+    std::string minuendCharEnd, subtrahendCharEnd, differenceCharEnd, finalDifference = "";
+    int minuendDigitEnd, subtrahendDigitEnd, differenceDigitEnd;
 
-    while(minuend.length() > 0) {
+    // Get initial lenght of strengs to prevent needless recalculations
+    const int minuendLength = minuend.length();
+    const int subtrahendLength = subtrahend.length();
+
+    // Add leading 0's to make string lengths even
+    if(minuendLength != subtrahendLength) {
+        if(minuendLength > subtrahendLength) {
+            while(subtrahend.length() != minuendLength) {
+            subtrahend = '0' + subtrahend; 
+            }
+        }
+        if(subtrahendLength > minuendLength) {
+            while(minuend.length() != subtrahendLength) {
+                minuend = '0' + minuend;
+            }
+        }
     }
-        // Get the last character in the number and delete it from the number
-        workingCharMinuend = minuend.back();
-        minuend.pop_back();
-        workingCharSubtrahend = subtrahend.back();
-        subtrahend.pop_back();
-
-        // Convert working characters to integers
-        workingDigitMinuend = std::stoi(workingCharMinuend);
-        workingDigitSubtrahend = std::stoi(workingCharSubtrahend);
-
-        // Check weather to use borrow.
-        if(workingDigitSubtrahend < workingDigitMinuend) {
-            workingDigitMinuend += 10;
-
-            // Works if the digit to borrow from is not 0;
-            if(minuend.back() != '0') {
-                borrowedChar = minuend.back();
-                minuend.pop_back();
-                borrowedDigit = std::stoi(borrowedChar) - 1;
-                minuend.append(std::to_string(borrowedDigit));
-
-                // Subtract and convert to string
-                difference = workingDigitMinuend - workingDigitSubtrahend;
-                workingDiffrenceChar = std::to_string(difference);
-            }
-            // Case to handle borrow digits that are 0's
-            else {
-                int borrowHoldDigit, counter = 0;
-                std::string borrowHold;
-
-                // Get number of 0's in a row to determine the borrow path.
-                while(minuend.back() == '0') {
-                    minuend.pop_back();
-                    counter++;
-                }
-
-                // Subtract the borrow digit
-                borrowHold = minuend.back();
-                borrowHoldDigit = std::stoi(borrowHold);
-                minuend.pop_back();
-                minuend.append(std::to_string(borrowHoldDigit - 1));
-
-                // Set the borrow path
-                std::string nines = "";
-                for(int i = 0; i <= counter; i++) {
-                    nines.push_back('9');
-                }
-                minuend.append(nines);
-
-                // Subtract and convert to string
-                workingDigitMinuend += 10;
-                difference = workingDigitMinuend - workingDigitSubtrahend;
-                workingDiffrenceChar = std::to_string(difference);
-            }
-
-            // Add the digit difference to the final difference
-            finalDifference = workingDiffrenceChar + finalDifference;
-        }
-
-        // Numbers that don't need borrow
-        else {
-            difference = workingDigitMinuend - workingDigitSubtrahend;
-            workingDiffrenceChar = std::to_string(difference);
-
-            finalDifference = workingDiffrenceChar + finalDifference;
-        }
     
+
+    // Main processing loops
+    if(minuendLength <= subtrahendLength) {
+        while(minuend.length() != 0){
+            // Read and remove the last character of each number
+            minuendCharEnd = minuend.back();
+            minuend.pop_back();
+            subtrahendCharEnd = subtrahend.back();
+            subtrahend.pop_back();
+
+            // Convert the last character to an integer
+            minuendDigitEnd = std::atoi(minuendCharEnd.c_str());
+            subtrahendDigitEnd = std::atoi(subtrahendCharEnd.c_str());
+
+            // Borrow logic
+            if(subtrahendDigitEnd > minuendDigitEnd) {
+                minuendDigitEnd += 10;
+
+                // Logic for borrow path
+                if(minuend.back() == '0') {
+                    // Find the number of zeros in a row
+                    int count = 0;
+                    while(minuend.back() == '0') {
+                        count++;
+                        minuend.pop_back();
+                    }
+
+                    // Fill zeros with 9's
+                    std::string nines = "";
+                    for(int i = 0; i != count; i++) {
+                        nines.push_back('9');
+                    }
+                }
+                // Logic for single borrow
+                else {
+
+                    std::string minuendCharEndTemp(1, minuend.back());
+                    minuend.pop_back();
+                    int minuendDigitEndTemp = std::atoi(minuendCharEndTemp.c_str());
+                    minuend.push_back(minuendDigitEndTemp - 1);
+                    
+                }
+            }
+            // Borrowless subtraction
+            else {
+                differenceDigitEnd = minuendDigitEnd - subtrahendDigitEnd;
+            }
+
+            // Convert the difference digit to a string
+            differenceCharEnd = std::to_string(differenceDigitEnd);
+
+            finalDifference = differenceCharEnd + finalDifference;
+        }
+    }
+    else {
+
+    }
+
     return finalDifference;
 }
